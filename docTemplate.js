@@ -1,9 +1,51 @@
 // Example on how to customize the look at feel using Styles
 
 const fs=require("fs")
-const { AlignmentType, Header, Document, HeadingLevel, LevelFormat, Packer, Paragraph, TextRun, UnderlineType, PageNumber } = require("docx");
+const { AlignmentType, Header, Document, HeadingLevel,  Paragraph, TextRun,  PageNumber, PageBreak } = require("docx");
 
-const doc = new Document({
+const PageTemplate=(question,code,output, last=false)=>{
+    const d = [
+        new Paragraph(
+            {
+                text:"--Write problem statement here--",
+                heading:HeadingLevel.HEADING_1
+            }
+        ),
+        new Paragraph({
+            heading:"Heading2",
+            text:"Code"
+        }),
+        ...code.split("\n").map((line)=>(
+            new Paragraph({
+                text: line
+            })
+        )),
+        new Paragraph({
+            heading:"Heading2",
+            text:"Output"
+        }),
+        ...output.split("\n").map((line)=>(
+            new Paragraph({
+                text: line
+            })
+        )),
+    ]
+    if(last!=true){
+        d.push(
+            new Paragraph(
+                {
+                    children:[
+                        new PageBreak()
+                    ]
+                }
+            )
+        )
+    }
+
+    return d
+}
+
+const doc =(data=[])=>new Document({
     styles: {
         default: {
             heading1: {
@@ -76,39 +118,21 @@ const doc = new Document({
                 })
             },
             children: [
-                new Paragraph(
-                    {
-                        text:"Problem 1: Write a program to display sum of two numbers.",
-                        heading:HeadingLevel.HEADING_1
-                    }
-                ),
-                new Paragraph({
-                    heading:"Heading2",
-                    text:"Code"
-                }),
-                new Paragraph(
-                    {
-                        children:[
-                            new TextRun(
-                                {
-                                    text: "#include<stdio.h>",
-                                    font:{
-                                        name:"Monospace"
-                                    }
-                                }
-                            )
-                        ]
-                    }
-                ),
-                new Paragraph({
-                    heading:"Heading2",
-                    text:"Output"
-                }),
+                ...data
             ]
         },
     ],
 });
 
+
+const createDocData=async(data=[])=>{
+   let docData=[]
+    for(let i=0;i<data.length;i++){
+        docData.push(...PageTemplate("",data[i].code,data[i].output,i==data.length-1))
+    }
+    return doc(docData)
+}
+
 module.exports= {
-    doc
+    createDocData
 }

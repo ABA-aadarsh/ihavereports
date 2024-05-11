@@ -1,6 +1,5 @@
 const fs=require("fs")
 const {exec,execFile,spawn, execSync}=require("child_process")
-require('console.history')
 const readline = require('readline');
 const { exit } = require('process');
 
@@ -20,7 +19,7 @@ const compileCodes=async ()=>{
         const files=fs.readdirSync("./modifiedCodes")
         files.forEach(async(file,_)=>{
             try{
-                const child=execSync(`gcc ./modifiedCodes/${file} -o c${_+1} & move /y c${_+1}.exe ./executables/`)
+                execSync(`gcc ./modifiedCodes/${file} -o c${_+1} & move /y c${_+1}.exe ./executables/`)
             }catch(err){
                 console.log(err)
             }
@@ -33,48 +32,58 @@ const compileCodes=async ()=>{
 
 }
 
+const clearFiles=()=>{
+    const deleteFileInsideFolder=(folder)=>{
+        if(["executables","outputs","modifiedCodes"].includes(folder)){
+            const files=fs.readdirSync("./"+folder)
+            for(let i=0;i<files.length;i++){
+                fs.unlinkSync("./"+folder+"/"+files[i])
+            }
+        }
+    }
+    deleteFileInsideFolder("executables")
+    deleteFileInsideFolder("outputs")
+    deleteFileInsideFolder("modifiedCodes")
+}
+
 
 
 const executeCodes=async ()=>{
-    const programProcess = spawn('./executables/c1.exe', { stdio: ['pipe', 'pipe', 'pipe'], detached:false});
+    const executePromiseSeries=async (iterable,action)=>{
+        try{
+            for (const x of iterable) {
+                    await action(x)
+            }
+            return true
+        }catch(err){
+            console.log(err)
+            return false
+        }
+    }
+    const executables=fs.readdirSync("./executables")
+    const executePromise=(e)=>new Promise((resolve,reject)=>{
+            const programProcess = spawn(`./executables/${e}`, { stdio: ['pipe', 'pipe', 'pipe'], detached:false});
+            const outputFileStream = fs.createWriteStream(`./outputs/${e.split(".")[0]+".txt"}`);
+            programProcess.stdout.on('data', (data) => {
+                console.log(`${data}`);
+                outputFileStream.write(data);
+            });
 
-    const outputFileStream = fs.createWriteStream('output.txt');
+            rl.on('line', (input) => {
+                programProcess.stdin.write(input + '\n');
+                outputFileStream.write(input+"\n")
+            });
 
-    programProcess.stdout.on('data', (data) => {
-      console.log(`${data}`);
-      outputFileStream.write(data);
-    });
-
-    rl.on('line', (input) => {
-      programProcess.stdin.write(input + '\n');
-      outputFileStream.write(input+"\n")
-    });
-
-    programProcess.on('close', (code) => {
-      console.log('Program exited with code', code);
-      outputFileStream.end();
-      exit()
-    });
-
-
-    // const exe = spawn('cmd.exe', ['/c', 'cd ./executables & c1.exe'],
-    //     {
-    //         detached:false,
-    //         stdio:[process.stdin,process.stdout,"pipe"]
-    //     }
-    // );
-
-    // exe.stderr.on('data', (data) => { 
-    //     console.error(data.toString()); 
-    // }); 
-    
-    // exe.on('exit', (code) => { 
-    //     console.log(`\n\nChild exited with code ${code}`); 
-    //     console.log(console.history[0].arguments)
-    // }); 
-
+            programProcess.on('close', (code) => {
+                console.log('Program exited with code', code);
+                outputFileStream.end();
+                resolve()
+            });
+        }
+    )
+    const res = await executePromiseSeries(executables,executePromise)
+    console.log(res)
 }
-
 const modifyCodes=async()=>{
     function addFlush(str) {
         const pattern = /printf\s*\(([^)]+)\);(\s*)scanf\s*\(([^)]+)\);/g;
@@ -100,5 +109,6 @@ const modifyCodes=async()=>{
 module.exports = {
     compileCodes,
     executeCodes,
-    modifyCodes
+    modifyCodes,
+    clearFiles
 }
