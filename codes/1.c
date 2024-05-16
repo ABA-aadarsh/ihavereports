@@ -1,3 +1,9 @@
+/*
+#question(
+    Write a program that takes 3 integers as input from user and displays the sum of them.
+)
+*/
+
 #include<stdio.h>
 int main(){
     int i=0,sum=0;int num[3];

@@ -9,5 +9,5 @@ async function ai_response(prompt) {
   const text = response.text();
   console.log(text);
 }
-const question="Write a c program to print 'Hello World meow meow' 10 times using for loop"
+const question="Write a c program to print hcf between two user given numbers"
 ai_response(`Write a algorithm for this question '${question}'. Give only steps. Each step should be minimal in the sense that it is not lengthy`);

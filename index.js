@@ -12,8 +12,19 @@ const collectData=async ()=>{
   const ouputs=fs.readdirSync("./outputs")
   for(let i=0;i<codes.length;i++){
     const c=fs.readFileSync(`./codes/${codes[i]}`,"utf-8")
+    
+    console.log(c.includes("#question"))
+    const questionRegex = /#question\((.*?)\)/;
+    let q;
+    // Extract the content
+    const match = c.match(questionRegex);
+    if (match && match[1]) {
+      q = match[1];
+    } else {
+      q="--Write question here--"
+    }
     const o=fs.readFileSync(`./outputs/${ouputs[i]}`,"utf-8")
-    data.push({question:"" ,code:c,output:o})
+    data.push({question:q ,code:c,output:o})
   }
   return data
 }

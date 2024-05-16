@@ -3,12 +3,20 @@
 const fs=require("fs")
 const { AlignmentType, Header, Document, HeadingLevel,  Paragraph, TextRun,  PageNumber, PageBreak } = require("docx");
 
-const PageTemplate=(question,code,output, last=false)=>{
+const PageTemplate=(question,code,output, last=false, questionIndex)=>{
     const d = [
         new Paragraph(
             {
-                text:"--Write problem statement here--",
-                heading:HeadingLevel.HEADING_1
+                heading:HeadingLevel.HEADING_1,
+                children:[
+                    new TextRun({
+                        bold:true,
+                        text:`Question ${questionIndex} : `
+                    }),
+                    new TextRun({
+                        text: `${question}`
+                    })
+                ]
             }
         ),
         new Paragraph({
@@ -26,6 +34,7 @@ const PageTemplate=(question,code,output, last=false)=>{
         }),
         ...output.split("\n").map((line)=>(
             new Paragraph({
+                style:"codeOutput",
                 text: line
             })
         )),
@@ -50,7 +59,7 @@ const doc =(data=[])=>new Document({
         default: {
             heading1: {
                 run: {
-                    size: 28,
+                    size: 24,
                     bold: false,
                     font:{
                         name:"Calibri"
@@ -58,7 +67,7 @@ const doc =(data=[])=>new Document({
                 },
                 paragraph: {
                     spacing: {
-                        after: 120,
+                        after: 360,
                     },
                 },
             },
@@ -69,8 +78,8 @@ const doc =(data=[])=>new Document({
                 },
                 paragraph: {
                     spacing: {
-                        before: 240,
-                        after: 120,
+                        before: 360,
+                        after: 240,
                     },
                 },
             },
@@ -97,6 +106,19 @@ const doc =(data=[])=>new Document({
                     },
                     size:18,
                     color:"2D3142"
+                },
+            },
+            {
+                id: "codeOutput",
+                name: "Code Output",
+                basedOn: "Normal",
+                quickFormat: true,
+                run: {
+                    font:{
+                        name:"Consolas",
+                        
+                    },
+                    size:22
                 },
             }
         ]
@@ -128,7 +150,7 @@ const doc =(data=[])=>new Document({
 const createDocData=async(data=[])=>{
    let docData=[]
     for(let i=0;i<data.length;i++){
-        docData.push(...PageTemplate("",data[i].code,data[i].output,i==data.length-1))
+        docData.push(...PageTemplate(data[i].question,data[i].code,data[i].output,i==data.length-1,i+1))
     }
     return doc(docData)
 }
