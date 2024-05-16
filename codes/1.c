@@ -1,6 +1,7 @@
 /*
 #question(
-    Write a program that takes 3 integers as input from user and displays the sum of them.
+    Write a program to take 3 integer input and print the sum of them.
+    This is a multi-line question so i must be able to handle it as well.
 )
 */
 

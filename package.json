@@ -13,7 +13,6 @@
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.11.1",
-    "carbon-now-cli": "^2.0.0",
     "docx": "^8.5.0",
     "dotenv": "^16.4.5"
   }

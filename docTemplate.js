@@ -4,6 +4,7 @@ const fs=require("fs")
 const { AlignmentType, Header, Document, HeadingLevel,  Paragraph, TextRun,  PageNumber, PageBreak } = require("docx");
 
 const PageTemplate=(question,code,output, last=false, questionIndex)=>{
+    const questionArray=question.split("\n").filter(_=>_!="")
     const d = [
         new Paragraph(
             {
@@ -14,11 +15,16 @@ const PageTemplate=(question,code,output, last=false, questionIndex)=>{
                         text:`Question ${questionIndex} : `
                     }),
                     new TextRun({
-                        text: `${question}`
+                        text: `${questionArray[0]}`
                     })
                 ]
             }
         ),
+        ...questionArray.splice(1).map((line,_)=>(
+            new Paragraph({
+                text: line
+            })
+        )),
         new Paragraph({
             heading:"Heading2",
             text:"Code"
@@ -67,7 +73,7 @@ const doc =(data=[])=>new Document({
                 },
                 paragraph: {
                     spacing: {
-                        after: 360,
+                        after: 120,
                     },
                 },
             },
@@ -118,6 +124,7 @@ const doc =(data=[])=>new Document({
                         name:"Consolas",
                         
                     },
+                    color:"4C566A",
                     size:22
                 },
             }

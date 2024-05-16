@@ -45,9 +45,6 @@ const clearFiles=()=>{
     deleteFileInsideFolder("outputs")
     deleteFileInsideFolder("modifiedCodes")
 }
-
-
-
 const executeCodes=async ()=>{
     const executePromiseSeries=async (iterable,action)=>{
         try{
