@@ -9,5 +9,5 @@ async function ai_response(prompt) {
   const text = response.text();
   console.log(text);
 }
-const question="Write a c program to print hcf between two user given numbers"
+const question="Write a program that takes 10 input integers from a user and gives sum"
 ai_response(`Write a algorithm for this question '${question}'. Give only steps. Each step should be minimal in the sense that it is not lengthy`);
