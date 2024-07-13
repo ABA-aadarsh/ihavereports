@@ -28,8 +28,15 @@ const clearExecutables = (folderpath)=>{
     })
 }
 
+
+const randomDrive = (list=[])=>{
+    const i = Math.floor(Math.random()*list.length)
+    return list[i]
+}
+
 module.exports ={
     checkFolderExists,
     createEmptyFolder,
-    clearExecutables
+    clearExecutables,
+    randomDrive
 }

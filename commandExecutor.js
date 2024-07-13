@@ -2,12 +2,7 @@ const path = require("path")
 const fs = require("fs")
 const {spawn, execSync}=require("child_process")
 const {createEmptyFolder, clearExecutables} = require("./lib.js")
-const readline = require('readline');
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    terminal:true
-});
+const {rl} = require("./readLineHandler.js")
 
 const os = {
     linux : "linux",
@@ -50,7 +45,9 @@ class CommandExec {
         const executePromiseSeries=async (iterable,action)=>{
             try{
                 for (const x of iterable) {
+                        console.log("Executing Program : ", x);
                         await action(x)
+                        console.log("\n")
                 }
                 return true
             }catch(err){
@@ -64,11 +61,11 @@ class CommandExec {
 
         const executePromise=(e)=>new Promise((resolve,reject)=>{
                 const programProcess = spawn(
-                    path.resolve(this.folderPath,`${e}`), 
+                    path.resolve(this.folderPath, e),
                     { 
                         stdio: ['pipe', 'pipe', 'pipe'], 
                         detached:false,
-                        cwd: path.join(__dirname, this.folderPath)
+                        cwd: path.resolve(this.folderPath)
                     }
                 );
                 const outputFileStream = fs.createWriteStream(
@@ -84,13 +81,13 @@ class CommandExec {
                 });
     
                 programProcess.on('close', (code) => {
-                    console.log('Program exited with code', code);
+                    console.log('Program execution completed.\n Execution code = ', code);
                     outputFileStream.end();
                     resolve()
                 });
             }
         )
-        const res = await executePromiseSeries(executables,executePromise)
+        await executePromiseSeries(executables,executePromise)
     }
     compile({fileName, sourcepath, executablePath, ext}){
         const command = this.getCompileCommand(
@@ -105,7 +102,6 @@ class CommandExec {
     compileAll (){
         for(let i = 0; i<this.codesFiles.length ; i++){
             const _ = this.codesFiles[i]
-            console.log()
             this.compile(
                 {
                     fileName: _.name,
@@ -117,10 +113,10 @@ class CommandExec {
         }
     }
     modifyCode(){
-        function addFlush(str) {
-            const pattern = /printf\s*\(([^)]+)\);(\s*)scanf\s*\(([^)]+)\);/g;
-            return str.replace(pattern, (match, printfArgs, space, scanfArgs) => {
-                return `printf(${printfArgs});${space}fflush(stdout);${space}scanf(${scanfArgs});`;
+        function addFlushToPrintf(code) {
+            const pattern = /printf\s*\(([^)]+)\);/g;
+            return code.replace(pattern, (match, printfArgs) => {
+                return `printf(${printfArgs}); fflush(stdout);`;
             });
         }
 
@@ -132,7 +128,7 @@ class CommandExec {
                 file.path
                 , "utf-8"
             )
-            const modified=addFlush(a);
+            const modified=addFlushToPrintf(a);
             const f=fs.writeFileSync(
                 path.resolve(this.folderPath, this.folderNames.modifiedCodes, fileFullName)    
                 ,modified
@@ -165,12 +161,17 @@ class CommandExec {
             }else{
                 question = "__ Write Question Here __"
             }
-            console.log("Question: ", question)
             this.codesFiles[index].code = codeData.replace(clearRegex,"").trimStart()
             this.codesFiles[index].consoleInterface = consoleData
             this.codesFiles[index].question = question
         })
         return this.codesFiles
+    }
+    clearTemps(){
+        createEmptyFolder(this.folderPath, this.folderNames.modifiedCodes)
+        createEmptyFolder(this.folderPath, this.folderNames.consoleOutput)
+        fs.rmdirSync(path.join(this.folderPath, this.folderNames.modifiedCodes))
+        fs.rmdirSync(path.join(this.folderPath, this.folderNames.consoleOutput))
     }
 }
 
