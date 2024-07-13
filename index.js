@@ -17,13 +17,15 @@ function getUserInput(question) {
 
 
 const main = async () => {
-
+    let codeFolderPath ;
     const argv = process.argv
     if (argv.length < 3) {
         console.log("You haven't specified folder name")
-        exit(1)
+        codeFolderPath = await getUserInput("Enter the folder path where your codes are saved \n(if the code exist in the same path press enter): ")
+        codeFolderPath == '\n' ? codeFolderPath="." : null; 
+    }else{
+        codeFolderPath = argv[2] //TODO: Verify
     }
-    const codeFolderPath = argv[2] //TODO: Verify
 
     const folderStatus = checkFolderExists(codeFolderPath)
     if (!folderStatus) {
@@ -31,7 +33,7 @@ const main = async () => {
         exit(1)
     }
 
-    let author = await getUserInput("Enter author name (this would be shown in output)\n(user) ")
+    let author = await getUserInput("\nEnter author name (this would be shown in output)\n(user) ")
     if(author=='\n') author = "user"
     console.log(`Set ${author} as author\n\n`)
 
@@ -68,6 +70,8 @@ const main = async () => {
     Packer.toBuffer(docData).then(async (buffer) => {
         fs.writeFileSync(path.join(codeFolderPath,"Report.docx"), buffer);
         console.log(`Report.docx is created at path ${codeFolderPath}`);
+
+        console.log("\nSource code available at https://github.com/ABA-aadarsh/ihavereports");
         rl.close()
         exit(0)
     });

@@ -7,7 +7,8 @@
     "build": "webpack",
     "bundleRun": "node dist/bundle.js",
     "start": "node index.js",
-    "pkgLinux": "pkg dist/bundle.js --targets node14-linux-x64 --output ihavereports"
+    "pkgLinux": "pkg dist/bundle.js --targets node14-linux-x64 --output ihavereports",
+    "pkgWin" : "pkg dist/bundle.js --targets node14-win-x64 --output ihavereports.exe"
   },
   "pkg": {
     "scripts": [

@@ -18,12 +18,18 @@ const createEmptyFolder = (basepath, folderName) =>  {
 
 
 const clearExecutables = (folderpath)=>{
+    // only on production Mode 
+    const ignore = [process.argv[0]]
     fs.readdirSync(
         folderpath
     ).forEach(file => {
-        if(file.split(".")[1]=="o" || file.split(".")[1]=="exe"){
-            const currentPath = path.resolve(folderpath, file)
-            fs.unlinkSync(currentPath)
+        if(ignore.includes(file)){
+            return 
+        }else{
+            if(file.split(".")[1]=="o" || file.split(".")[1]=="exe"){
+                const currentPath = path.resolve(folderpath, file)
+                fs.unlinkSync(currentPath)
+            }
         }
     })
 }
