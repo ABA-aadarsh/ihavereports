@@ -19,6 +19,9 @@ class CommandExec {
         }else if(process.platform==os.windows){
             this.machine=os.windows
         }
+        else{
+            throw Error("Seems application can't run on this machine")
+        }
 
         this.folderNames = {
             consoleOutput: "consoleInterface",
@@ -57,7 +60,15 @@ class CommandExec {
         }
         const executables=fs.readdirSync(
             path.resolve(this.folderPath)
-        ).filter(i=>i.split(".")[1]=="o")
+        ).filter(i=>{
+            if(this.machine==os.linux){
+                return i.split(".")[1]=="o"
+            }else if(this.machine==os.windows){
+                return i.split(".")[1]=="exe"
+            }else{
+                return false
+            }
+        })
 
         const executePromise=(e)=>new Promise((resolve,reject)=>{
                 const programProcess = spawn(
@@ -69,8 +80,8 @@ class CommandExec {
                     }
                 );
                 const outputFileStream = fs.createWriteStream(
-                    path.resolve(this.folderPath, this.folderNames.consoleOutput, `${e.split(".")[0]+".txt"}`)
-                );
+                    path.resolve(this.folderPath, this.folderNames.consoleOutput, `${e.split(".")[0]}.txt`)
+                )
                 programProcess.stdout.on('data', (data) => {
                     console.log(`${data}`);
                     outputFileStream.write(data);

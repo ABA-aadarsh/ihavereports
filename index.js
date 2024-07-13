@@ -1,11 +1,11 @@
 const { exit } = require("process")
-const {  allowedExtensions , CommandExec} = require("./commandExecutor.js")
-const { checkFolderExists } = require("./lib.js")
-const { createDocData } = require("./docGenerator.js")
+const {  allowedExtensions , CommandExec} = require("./src/commandExecutor.js")
+const { checkFolderExists } = require("./src/lib.js")
+const { createDocData } = require("./src/docGenerator.js")
 const fs = require("fs")
 const path = require("path")
 const { Packer } = require("docx")
-const {rl}=require("./readLineHandler.js")
+const {rl}=require("./src/readLineHandler.js")
 
 function getUserInput(question) {
     return new Promise((resolve) => {
@@ -17,11 +17,11 @@ function getUserInput(question) {
 
 
 const main = async () => {
+    console.log(":) ihavereports\n\n")
     let codeFolderPath ;
     const argv = process.argv
     if (argv.length < 3) {
-        console.log("You haven't specified folder name")
-        codeFolderPath = await getUserInput("Enter the folder path where your codes are saved \n(if the code exist in the same path press enter): ")
+        codeFolderPath = await getUserInput("Enter the folder path where your codes are saved \n(if this progam exist in the same folder just press enter): ")
         codeFolderPath == '\n' ? codeFolderPath="." : null; 
     }else{
         codeFolderPath = argv[2] //TODO: Verify
@@ -52,6 +52,11 @@ const main = async () => {
         }
     ))
 
+    if(codeFiles.length==0){
+        console.log("It seems there is no codes files inside. Exiting\n")
+        exit(0)
+    }
+
     executor.setCodeFiles(
         codeFiles
     )
@@ -61,7 +66,7 @@ const main = async () => {
     executor.compileAll()
 
     await executor.executeAll()
-    console.clear()
+    // console.clear()
     console.log("-----------\nPrograms execution done. \n\nNow collecting data...\n")
     const data = executor.collectData()
     console.log("Done\n")
@@ -70,8 +75,9 @@ const main = async () => {
     Packer.toBuffer(docData).then(async (buffer) => {
         fs.writeFileSync(path.join(codeFolderPath,"Report.docx"), buffer);
         console.log(`Report.docx is created at path ${codeFolderPath}`);
+        console.log("\nSource code available at https://github.com/ABA-aadarsh/ihavereports\n\n");
 
-        console.log("\nSource code available at https://github.com/ABA-aadarsh/ihavereports");
+        await getUserInput("Press enter to exit: ")
         rl.close()
         exit(0)
     });
