@@ -20,10 +20,15 @@ const main = async () => {
     let codeFolderPath;
     const argv = process.argv;
     if (argv.length < 3) {
-        codeFolderPath = await getUserInput(
-            "Enter the folder path where your codes are saved \n(if this progam exist in the same folder just press enter): ",
-        );
-        codeFolderPath == "\n" ? (codeFolderPath = ".") : null;
+        codeFolderPath =
+            (
+                await getUserInput(
+                    "Enter the folder path where your codes are saved \n(if this progam exist in the same folder just press enter): ",
+                )
+            ).trim() || "";
+        if (codeFolderPath == "") {
+            codeFolderPath = ".";
+        }
     } else {
         codeFolderPath = argv[2]; //TODO: Verify
     }
