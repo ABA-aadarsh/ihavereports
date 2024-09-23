@@ -23,11 +23,12 @@ const clearExecutables = (folderpath)=>{
     fs.readdirSync(
         folderpath
     ).forEach(file => {
-        if(ignore.includes(file)){
+        const filepath = path.resolve(folderpath, file)
+        if(ignore.includes(filepath)){
             return 
         }else{
             if(file.split(".")[1]=="o" || file.split(".")[1]=="exe"){
-                const currentPath = path.resolve(folderpath, file)
+                const currentPath = filepath
                 fs.unlinkSync(currentPath)
             }
         }

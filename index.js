@@ -69,7 +69,7 @@ const main = async () => {
     }
 
     executor.setCodeFiles(codeFiles);
-
+    console.log("Codes are being compiled.\nWait.")
     executor.modifyCode();
 
     executor.compileAll();
