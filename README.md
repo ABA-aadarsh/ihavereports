@@ -1,5 +1,7 @@
 # ihavereports
 
+(lots of bugs currently)
+
 Making the plain coding assingment reports is more frustating and time consuming than writing code itself. Automate it.
 
 
