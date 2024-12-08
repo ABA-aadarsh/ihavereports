@@ -1,10 +1,26 @@
-// Example on how to customize the look at feel using Styles
+import fs from "node:fs"
+import { AlignmentType, Header, Document, HeadingLevel,  Paragraph, TextRun,  PageNumber, PageBreak } from "docx"
+import { randomDrive } from "./lib";
 
-const fs=require("fs")
-const { AlignmentType, Header, Document, HeadingLevel,  Paragraph, TextRun,  PageNumber, PageBreak } = require("docx");
-const { randomDrive } = require("./lib");
-
-const PageTemplate=({question,code,output, last=false, questionIndex, author, fileName, drive})=>{
+const PageTemplate=({
+    question,
+    code,
+    output,
+    last=false,
+    questionIndex,
+    author,
+    fileName,
+    drive
+}: {
+    question: string,
+    code: string,
+    output: string,
+    last: boolean,
+    questionIndex: number,
+    author: string,
+    fileName: string,
+    drive: string
+})=>{
     const questionArray=question.split("\n").filter(_=>_!="")
     const d = [
         new Paragraph(
@@ -79,7 +95,7 @@ const PageTemplate=({question,code,output, last=false, questionIndex, author, fi
     return d
 }
 
-const doc =(data=[])=>new Document({
+const doc =(data:any[]=[])=>new Document({
     styles: {
         default: {
             heading1: {
@@ -173,7 +189,15 @@ const doc =(data=[])=>new Document({
 });
 
 
-const createDocData=async(data=[], author = "user")=>{
+export const createDocData=async(
+    data: {
+        code:string,
+        name:string,
+        consoleInterface: string,
+        question: string,
+    }[], 
+    author:string = "user"
+): Promise<Document>=>{
     const drive = randomDrive(["C","D","E"])
    let docData=[]
     for(let i=0;i<data.length;i++){
@@ -191,8 +215,4 @@ const createDocData=async(data=[], author = "user")=>{
         ))
     }
     return doc(docData)
-}
-
-module.exports= {
-    createDocData
 }

@@ -1,13 +1,13 @@
-const { exit } = require("process");
-const { allowedExtensions, CommandExec } = require("./src/commandExecutor.js");
-const { checkFolderExists } = require("./src/lib.js");
-const { createDocData } = require("./src/docGenerator.js");
-const fs = require("fs");
-const path = require("path");
-const { Packer } = require("docx");
-const { rl } = require("./src/readLineHandler.js");
+import process from "node:process";
+import {CommandExec, allowedExtensions} from "./commandExecutor.js"
+import { checkFolderExists } from "./lib.js";
+import { createDocData } from "./docGenerator.js";
+import fs from "node:fs"
+import path from "node:path"
+import { Packer } from "docx";
+import rl from "./readLineHandler.js";
 
-function getUserInput(question) {
+function getUserInput(question: string): Promise<string> {
     return new Promise((resolve) => {
         rl.question(question, (answer) => {
             resolve(answer);
@@ -25,7 +25,7 @@ const main = async () => {
                 await getUserInput(
                     "Enter the folder path where your codes are saved \n(if this progam exist in the same folder just press enter): ",
                 )
-            ).trim() || "";
+            ).trim();
         if (codeFolderPath == "") {
             codeFolderPath = ".";
         }
@@ -38,7 +38,7 @@ const main = async () => {
         console.log(
             "Error in accessing folder\nProbably the directory does not exists",
         );
-        exit(1);
+        process.exit(1);
     }
     let author = await getUserInput(
         "\nEnter author name (this would be shown in output)\n(user) ",
@@ -50,7 +50,7 @@ const main = async () => {
 
     const codeFiles = fs
         .readdirSync(path.resolve(codeFolderPath))
-        .filter((i) => allowedExtensions.includes(i.split(".")[1]))
+        .filter((i) => allowedExtensions.has(i.split(".")[1]))
         .map((i) => ({
             path: path.join(codeFolderPath, i),
             name: i.split(".")[0],
@@ -65,7 +65,7 @@ const main = async () => {
 
     if (codeFiles.length == 0) {
         console.log("It seems there is no codes files inside. Exiting\n");
-        exit(0);
+        process.exit(0);
     }
 
     executor.setCodeFiles(codeFiles);
@@ -91,7 +91,7 @@ const main = async () => {
 
         await getUserInput("Press enter to exit: ");
         rl.close();
-        exit(0);
+        process.exit(0);
     });
 };
 

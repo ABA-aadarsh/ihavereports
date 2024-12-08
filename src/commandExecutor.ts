@@ -1,16 +1,37 @@
-const fs = require("fs");
-const { spawn, execSync } = require("child_process");
-const { createEmptyFolder, clearExecutables } = require("./lib.js");
-const { rl } = require("./readLineHandler.js");
-
+import fs from "node:fs"
+import {spawn, execSync} from "node:child_process"
+import {createEmptyFolder, clearExecutables} from "./lib.js"
+import rl from "./readLineHandler.js";
 const os = {
     linux: "linux",
     windows: "win32",
 };
-const allowedExtensions = ["cpp", "c"];
+export const allowedExtensions = new Set(["cpp", "c"]);
 
-class CommandExec {
-    constructor(folderPath, list = []) {
+export class CommandExec {
+    private folderPath: string;
+    private machine: string
+    private folderNames = {
+        consoleOutput: "consoleInterface",
+        modifiedCodes: "modifiedCodes",
+    };
+    private codesFiles: {
+        path: string,
+        name: string,
+        ext: string,
+        question: string | null,
+        consoleInterface: string | null,
+        code: string | null
+    }[]
+
+    constructor(folderPath:string, list:{
+        path: string,
+        name: string,
+        ext: string,
+        question: string | null,
+        consoleInterface: string | null,
+        code: string | null
+    }[] = []) {
         this.folderPath = folderPath;
 
         if (process.platform == os.linux) {
@@ -20,14 +41,8 @@ class CommandExec {
         } else {
             throw Error("Seems application can't run on this machine");
         }
-
-        this.folderNames = {
-            consoleOutput: "consoleInterface",
-            modifiedCodes: "modifiedCodes",
-        };
-
         this.codesFiles = list.filter((i) =>
-            allowedExtensions.includes(i?.ext || null),
+            allowedExtensions.has(i.ext)
         );
 
         createEmptyFolder(this.folderPath, this.folderNames.modifiedCodes);
@@ -35,15 +50,15 @@ class CommandExec {
         clearExecutables(this.folderPath);
     }
 
-    setCodeFiles(list = []) {
-        this.codesFiles = list.filter((i) => allowedExtensions.includes(i.ext));
+    setCodeFiles(list: typeof this.codesFiles = []) {
+        this.codesFiles = list.filter((i) => allowedExtensions.has(i.ext));
     }
-    getCompileCommand(ext, fullpath, fileName, exePaths) {
+    getCompileCommand(ext: string, fullpath:string, fileName:string, exePaths: string) {
         const outputType = this.machine == os.linux ? "o" : "exe";
         return `${ext == "c" ? "gcc" : "g++"} ${require("path").resolve(fullpath).replace(/ /g, `\\ `)} -o ${require("path").resolve(exePaths, fileName).replace(/ /g, `\\ `)}.${outputType}`;
     }
     async executeAll() {
-        const executePromiseSeries = async (iterable, action) => {
+        const executePromiseSeries = async (iterable: string[], action: (data:any)=>any) => {
             try {
                 for (const x of iterable) {
                     console.log("Executing Program : ", x);
@@ -60,7 +75,7 @@ class CommandExec {
             return i.name + (this.machine == os.linux ? ".o" : ".exe");
         });
 
-        const executePromise = (e) =>
+        const executePromise = (e: string) =>
             new Promise((resolve) => {
                 const programProcess = spawn(
                     require("path").resolve(this.folderPath, e),
@@ -92,12 +107,14 @@ class CommandExec {
                         code,
                     );
                     outputFileStream.end();
-                    resolve();
+                    resolve(1);
                 });
             });
         await executePromiseSeries(executables, executePromise);
     }
-    compile({ fileName, sourcepath, executablePath, ext }) {
+    compile({ fileName, sourcepath, executablePath, ext }:{
+        fileName: string, sourcepath: string, executablePath: string, ext: string
+    }) {
         const command = this.getCompileCommand(
             ext,
             sourcepath,
@@ -119,7 +136,7 @@ class CommandExec {
         }
     }
     modifyCode() {
-        function addFlushToPrintf(code) {
+        function addFlushToPrintf(code: string) {
             const pattern = /printf\s*\(([^)]+)\);/g;
             return code.replace(pattern, (match, printfArgs) => {
                 return `printf(${printfArgs}); fflush(stdout);`;
@@ -143,7 +160,15 @@ class CommandExec {
         return true;
     }
 
-    collectData() {
+    collectData(): 
+    {   path: string;
+        name: string;
+        ext: string;
+        question: string
+        consoleInterface: string
+        code: string
+    }[]
+    {
         // collect console interface and questions
         const consoleBasePath = require("path").join(
             this.folderPath,
@@ -177,7 +202,16 @@ class CommandExec {
             this.codesFiles[index].consoleInterface = consoleData;
             this.codesFiles[index].question = question;
         });
-        return this.codesFiles;
+        return this.codesFiles.map(
+            i=>(
+                {
+                    ...i,
+                    code: i.code || "",
+                    question: i.question || "",
+                    consoleInterface: i.consoleInterface || ""
+                }
+            )
+        );
     }
     clearTemps() {
         createEmptyFolder(this.folderPath, this.folderNames.modifiedCodes);
@@ -196,8 +230,3 @@ class CommandExec {
         );
     }
 }
-
-module.exports = {
-    CommandExec,
-    allowedExtensions,
-};

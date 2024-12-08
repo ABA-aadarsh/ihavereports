@@ -1,10 +1,10 @@
-const fs = require("fs")
-const path = require("path")
-const checkFolderExists =  (folderpath)=>{
-    if(fs.existsSync(folderpath)) return true;
-    return false;
+import fs from "node:fs"
+import path from "node:path"
+
+export const checkFolderExists =  (folderpath: string)=>{
+    return fs.existsSync(folderpath);
 }
-const createEmptyFolder = (basepath, folderName) =>  {
+export const createEmptyFolder = (basepath:string, folderName: string) =>  {
     const givenFolderPath = path.resolve(basepath, folderName)
     if (fs.existsSync(givenFolderPath)) {
         fs.readdirSync(givenFolderPath).forEach(file => {
@@ -17,7 +17,7 @@ const createEmptyFolder = (basepath, folderName) =>  {
 }
 
 
-const clearExecutables = (folderpath)=>{
+export const clearExecutables = (folderpath:string)=>{
     // only on production Mode 
     const ignore = [process.argv[0]]
     fs.readdirSync(
@@ -36,14 +36,7 @@ const clearExecutables = (folderpath)=>{
 }
 
 
-const randomDrive = (list=[])=>{
+export const randomDrive = (list:string[]=[])=>{
     const i = Math.floor(Math.random()*list.length)
     return list[i]
-}
-
-module.exports ={
-    checkFolderExists,
-    createEmptyFolder,
-    clearExecutables,
-    randomDrive
 }

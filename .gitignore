@@ -7,3 +7,5 @@ ihavereports
 *.exe
 *.o
 test
+continuefromhere
+ts-to-js

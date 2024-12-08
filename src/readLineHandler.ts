@@ -1,4 +1,5 @@
-const readline = require('readline');
+import readline from "node:readline"
+import process from "node:process"
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -6,4 +7,4 @@ const rl = readline.createInterface({
 });
 
 
-module.exports = {rl}
+export default rl
