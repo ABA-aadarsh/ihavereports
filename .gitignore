@@ -1,7 +1,9 @@
 codesTest
 node_modules
-Report.docx
+*.docx
 dev.js
 dist
 ihavereports
-ihavereports.exe
+*.exe
+*.o
+test
